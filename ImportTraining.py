@@ -6,9 +6,9 @@ import pandas
 
 
 # Clear all variables
-sys.modules[__name__].__dict__.clear()
+#sys.modules[__name__].__dict__.clear()
 # Close all opened windows
-plt.close("all")
+#plt.close("all")
 
 # Get the current workin directory
 ASMdir = os.getcwd()
@@ -24,6 +24,7 @@ tLdMat = np.zeros(shape=(len(os.listdir(os.getcwd())),ld*2))
 # Iterate all landmark files, store all landmarks into a matrix
 ldlist = os.listdir(os.getcwd())
 for i in ldlist: 
+     if i.endswith(".txt") :
       tLdMat[ldlist.index(i),:] = np.loadtxt(i)   
       
 # Transfer tLdMat into a dataframe, then add row names as index
