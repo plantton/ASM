@@ -11,7 +11,7 @@ import pandas
 #plt.close("all")
 
 # Get the current workin directory
-ASMdir = os.getcwd()
+ASMdir = 'C:\\Users\\tangc\\Documents\\ComVi'
 
 # Change working dir to folder containing original landmarks
 lddir = ASMdir+'/_Data/Landmarks/original/'
