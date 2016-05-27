@@ -3,7 +3,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import Akima1DInterpolator
-from PIL import Image
 
 # Currently only for interpolation of one teeth.
 def interpolate_teeth(dataframe,labellist,j, nInterp,verbose):
