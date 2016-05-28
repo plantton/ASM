@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import Akima1DInterpolator
 
-# Currently only for interpolation of one teeth.
+# Currently only for interpolation of one tooth.
 def interpolate_teeth(dataframe,labellist,j, nInterp,verbose):
     temp = np.asarray(dataframe.loc[[labellist[j]]])
     temp = np.ravel(temp)
@@ -17,7 +17,7 @@ def interpolate_teeth(dataframe,labellist,j, nInterp,verbose):
         else:
             img = plt.imread('C:/Users/tangc/Documents/ComVi/_Data/Radiographs/0'+labellist[j][9:-4].split('-')[0]+'.tif')
         plt.imshow(img)
-        plt.title('Patient ' + labellist[j][9:-4])
+        plt.title('Patient ' + labellist[j][9:-4].split('-')[0])
         plt.plot(temp_x,temp_y,'ro')
         plt.show()
     # Use itertion to interpolate points between landmarks
