@@ -27,11 +27,11 @@ class Teeth:
                     tLdMat[int(str_j[9:-4].split('-')[1])-1,:] = np.loadtxt(str_j)
                     idx.append(str_j)   
           tLdMat = pandas.DataFrame(tLdMat, index=idx)
-          Teeth = np.zeros(shape=(9600,2))
+          Teeth = np.zeros(shape=(3200,2))
           # Now interpolate the teeth and combine the eight teeth into one structure.          
           for l in range(tLdMat.shape[0]):
-               tV = interpolate_teeth(tLdMat,idx,l, 31,False)
-               Teeth[l*1200:(l+1)*1200,:] = tV
+               tV = interpolate_teeth(tLdMat,idx,l, 11,False)
+               Teeth[l*400:(l+1)*400,:] = tV
           return Teeth
       
 
@@ -74,7 +74,7 @@ class Teeth:
            if bool(verbose):
                plt.plot(totalx,totaly,'g-')
             # Vertices    
-           Vertices = np.zeros((1200,2))
+           Vertices = np.zeros((400,2))
            Vertices[:,0] = totalx
            Vertices[:,1] = totaly
            return Vertices
@@ -91,7 +91,7 @@ class Teeth:
            fig = plt.figure()
            plt.imshow(img)
            plt.title('Patient ' + str(i))
-           plt.plot(Teeth_i[:,0],Teeth_i[:,1],'g-',markersize=1.5)
+           plt.plot(Teeth_i[:,0],Teeth_i[:,1],'g.',markersize=1.5)
            
 
 

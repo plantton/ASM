@@ -3,7 +3,6 @@ import sys
 import os
 import matplotlib.pyplot as plt
 import pandas
-import interpolate_teeth
 #import Teeth
 
 
