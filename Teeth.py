@@ -7,17 +7,23 @@ from scipy.interpolate import Akima1DInterpolator
 # A class represents 8 teeth for a certain patient.
 
 class Teeth:
-      global ASMdir
       ASMdir = 'C:/Users/tangc/Documents/ComVi'
-      global lddir
       lddir = ASMdir+'/_Data/Landmarks/original/'
       
-      def __init__(self):
-             self.Teeth = np.zeros(shape=(9600,2))
+      def __init__(self, i, Teeth = np.zeros(shape=(3200,2))):
+             self.name = 'Patient: '+str(i)
+             self.Teeth = Teeth
+             
+      def _name_(self,i):
+            if i in range(1,15,1):
+                self.name = 'Patient: '+str(i)
+            else:
+                raise RuntimeError('Patient number not in our set!')
 
       # range of i is between 1 to 14.
-      def create_teeth(i):
-          os.chdir(lddir)
+      def create_teeth(self):
+          i = int(self.name.split(':')[1])
+          os.chdir(self.lddir)
           ld = 40;
           tLdMat = np.zeros(shape=(8,ld*2))
           ldlist = os.listdir(os.getcwd())
@@ -30,13 +36,13 @@ class Teeth:
           Teeth = np.zeros(shape=(3200,2))
           # Now interpolate the teeth and combine the eight teeth into one structure.          
           for l in range(tLdMat.shape[0]):
-               tV = interpolate_teeth(tLdMat,idx,l, 11,False)
+               tV = self.interpolate_teeth(tLdMat,idx,l, 11,False)
                Teeth[l*400:(l+1)*400,:] = tV
-          return Teeth
+          self.Teeth = Teeth
       
 
       
-      def interpolate_teeth(dataframe,labellist,j, nInterp,verbose):
+      def interpolate_teeth(self,dataframe,labellist,j, nInterp,verbose):
            temp = np.asarray(dataframe.loc[[labellist[j]]])
            temp = np.ravel(temp)
            temp_x = temp[0:-1:2]
@@ -80,18 +86,17 @@ class Teeth:
            return Vertices
        
       #  Plot the interpolated images on the original radiograph
-      def show_graph(i):
-           graph_dir = ASMdir+'/_Data/Radiographs'
-           Teeth_i = create_teeth(i)
+      def show_graph(self):
+           graph_dir = self.ASMdir+'/_Data/Radiographs'
            os.chdir(graph_dir)
-           if len(str(i)) == 2:
-               img = plt.imread('C:/Users/tangc/Documents/ComVi/_Data/Radiographs/'+str(i)+'.tif')
+           if len(str(int(self.name.split(':')[1]))) == 2:
+               img = plt.imread('C:/Users/tangc/Documents/ComVi/_Data/Radiographs/'+str(int(self.name.split(':')[1]))+'.tif')
            else:
-               img = plt.imread('C:/Users/tangc/Documents/ComVi/_Data/Radiographs/0'+str(i)+'.tif')
+               img = plt.imread('C:/Users/tangc/Documents/ComVi/_Data/Radiographs/0'+str(int(self.name.split(':')[1]))+'.tif')
            fig = plt.figure()
            plt.imshow(img)
-           plt.title('Patient ' + str(i))
-           plt.plot(Teeth_i[:,0],Teeth_i[:,1],'g.',markersize=1.5)
+           plt.title('Patient ' + str(int(self.name.split(':')[1])))
+           plt.plot(self.Teeth[:,0],self.Teeth[:,1],'g.',markersize=1.5)
            
 
 
