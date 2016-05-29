@@ -7,8 +7,13 @@ from scipy.interpolate import Akima1DInterpolator
 # A class represents 8 teeth for a certain patient.
 
 class Teeth:
+      global ASMdir
       ASMdir = 'C:/Users/tangc/Documents/ComVi'
+      global lddir
       lddir = ASMdir+'/_Data/Landmarks/original/'
+      
+      def __init__(self):
+             self.Teeth = np.zeros(shape=(9600,2))
 
       # range of i is between 1 to 14.
       def create_teeth(i):
@@ -22,13 +27,14 @@ class Teeth:
                     tLdMat[int(str_j[9:-4].split('-')[1])-1,:] = np.loadtxt(str_j)
                     idx.append(str_j)   
           tLdMat = pandas.DataFrame(tLdMat, index=idx)
-          # Now interpolate the teeth and combine the eight teeth into one structure.
           Teeth = np.zeros(shape=(9600,2))
+          # Now interpolate the teeth and combine the eight teeth into one structure.          
           for l in range(tLdMat.shape[0]):
                tV = interpolate_teeth(tLdMat,idx,l, 31,False)
                Teeth[l*1200:(l+1)*1200,:] = tV
           return Teeth
       
+
       
       def interpolate_teeth(dataframe,labellist,j, nInterp,verbose):
            temp = np.asarray(dataframe.loc[[labellist[j]]])
@@ -85,7 +91,7 @@ class Teeth:
            fig = plt.figure()
            plt.imshow(img)
            plt.title('Patient ' + str(i))
-           plt.plot(Teeth_i[:,0],Teeth_i[:,1],'g.',markersize=1.5)
+           plt.plot(Teeth_i[:,0],Teeth_i[:,1],'g-',markersize=1.5)
            
 
 
