@@ -49,10 +49,10 @@ def interpolate_teeth(dataframe,labellist,j, nInterp,verbose):
     Vertices[:,1] = totaly
     
     # Lines
-    Lines = np.zeros(Vertices.shape)
-    Lines[:,0] = np.arange(0,Vertices.shape[0],1)
-    Lines[0:Lines.shape[0]-1,1] = np.arange(1,Vertices.shape[0],1)
-    Lines[-1,1] = 0
+    #Lines = np.zeros(Vertices.shape)
+    #Lines[:,0] = np.arange(0,Vertices.shape[0],1)
+    #Lines[0:Lines.shape[0]-1,1] = np.arange(1,Vertices.shape[0],1)
+    #Lines[-1,1] = 0
     
-    return Vertices,Lines
+    return Vertices
     
