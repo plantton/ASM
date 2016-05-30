@@ -15,7 +15,7 @@ class Teeth:
              self.Teeth = Teeth
              
       def _name_(self,i):
-            if i in range(1,15,1):
+            if i in range(1,16,1):
                 self.name = 'Patient: '+str(i)
             else:
                 raise RuntimeError('Patient number not in our set!')
@@ -98,9 +98,59 @@ class Teeth:
            plt.title('Patient ' + str(int(self.name.split(':')[1])))
            plt.plot(self.Teeth[:,0],self.Teeth[:,1],'g.',markersize=1.5)
            
-           
+      # Vectorize the following methods     
       def _num_points(self):
           return int(self.Teeth.shape[0])
+          
+      def _get_X(self, weight_matrix_):
+            return sum(weight_matrix_ * self.Teeth[:,0])
+            
+      def _get_Y(self, weight_matrix_):
+            return sum(weight_matrix_ * self.Teeth[:,1])
+            
+      def _get_Z(self, weight_matrix_):
+            return sum(weight_matrix_ * (self.Teeth[:,0]**2+self.Teeth[:,1]**2))
+            
+      def _get_C1(self, weight_matrix_, T):
+             return sum(weight_matrix_ * (self.Teeth[:,0]*T.Teeth[:,0] + self.Teeth[:,1]*T.Teeth[:,1]))
+             
+      def _get_C2(self, weight_matrix_, T):
+             return sum(weight_matrix_ * (T.Teeth[:,1]*self.Teeth[:,0] - T.Teeth[:,0]*self.Teeth[:,1]))
+             
+      
+                       
+      def _alignment_parameters(self, T,weight_matrix_):
+              X1 = T._get_X(weight_matrix_)
+              X2 = self._get_X(weight_matrix_)
+              Y1 = T._get_Y(weight_matrix_)
+              Y2 = self._get_Y(weight_matrix_)
+              Z = self._get_Z(weight_matrix_)
+              W = sum(weight_matrix_)
+              C1 = self._get_C1(weight_matrix_, T)
+              C2 = self._get_C2(weight_matrix_, T)
+              
+              # Matrix in the original paper
+              a = np.array([[ X2, -Y2,   W,  0],
+                            [ Y2,  X2,   0,  W],
+                            [  Z,   0,  X2, Y2],
+                            [  0,   Z, -Y2, X2]])
+                            
+              b = np.array([X1, Y1, C1, C2])
+              return np.linalg.solve(a, b)
+              
+      def _apply_new_model(self, para):
+              t_15 = Teeth(15)
+              t_15.Teeth[:,0] = (para[0]*self.Teeth[:,0] - para[1]*self.Teeth[:,1]) + para[2]
+              t_15.Teeth[:,1] = (para[1]*self.Teeth[:,0] + para[0]*self.Teeth[:,1]) + para[3]
+              return t_15
+              
+      def align_to_shape(self, T, weight_matrix_):
+              para = self._alignment_parameters(T,weight_matrix_)
+              return self._apply_new_model(para)
+            
+              
+              
+              
            
 
 
