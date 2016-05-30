@@ -98,6 +98,10 @@ class Teeth:
            plt.title('Patient ' + str(int(self.name.split(':')[1])))
            plt.plot(self.Teeth[:,0],self.Teeth[:,1],'g.',markersize=1.5)
            
+           
+      def _num_points(self):
+          return int(self.Teeth.shape[0])
+           
 
 
       
