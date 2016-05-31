@@ -26,7 +26,26 @@ class Model:
             else:
                 raise RuntimeError('Patient number not in our set!')
                            
+       def _get_mean_shape(self, Patients):
+             _mean_shape =  np.zeros(shape=(3200,2))            
+             for i in range(len(self.Patients)):
+                    _mean_shape = _mean_shape + Patients[i].Teeth
+             return _mean_shape / len(Patients) if len(Patients) != 0 else _mean_shape      
+               
+       def _procrustes_analysis(self, Patients):
+             initial_shape = self.Patients[0].Teeth
+             initial_mean_shape = self._get_mean_shape(self.Patients)
+             for i,t in enumerate(self.Patients[1:]):
+                 token = t.align_to_shape(initial_shape, self.weight_matrix_)
+                 self.Patients[i] = token
+             _init_diff = initial_mean_shape - self.._get_mean_shape(self.Patients)
+             
+                
+                                                                                                
+                                                                                                                                               
+                                                                                                                                                                                                                                       
        def _weight_matrix(self,Patients):
+           # Inspired by https://github.com/andrewrch/active_shape_models
            self.Patients = Patients 
            #number of points on each unique shape
            if not Patients:

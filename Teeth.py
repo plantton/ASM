@@ -120,6 +120,8 @@ class Teeth:
       
                        
       def _alignment_parameters(self, T,weight_matrix_):
+          # Inspired by https://github.com/andrewrch/active_shape_models
+          # Based on the original functions on paper.
               X1 = T._get_X(weight_matrix_)
               X2 = self._get_X(weight_matrix_)
               Y1 = T._get_Y(weight_matrix_)
@@ -145,6 +147,7 @@ class Teeth:
               return t_15
               
       def align_to_shape(self, T, weight_matrix_):
+          # Inspired by https://github.com/andrewrch/active_shape_models
               para = self._alignment_parameters(T,weight_matrix_)
               return self._apply_new_model(para)
             
