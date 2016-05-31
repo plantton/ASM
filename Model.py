@@ -38,12 +38,34 @@ class Model:
              for i,t in enumerate(self.Patients[1:]):
                  token = t.align_to_shape(initial_shape, self.weight_matrix_)
                  self.Patients[i] = token
-             _init_diff = initial_mean_shape - self.._get_mean_shape(self.Patients)
+             _init_diff = initial_mean_shape - self._get_mean_shape(self.Patients)
              
                 
                                                                                                 
                                                                                                                                                
-                                                                                                                                                                                                                                       
+       def _weight_matrix_rev(self,Patients):  
+               # Inspired by https://github.com/andrewrch/active_shape_models
+               self.Patients = Patients
+               if not Patients:
+                    return np.array([0])
+               num_points = 3200  
+               num_patients = len(self.Patients)   
+               _all_teeths = np.zeros(shape=(3200,2*num_patients))
+               for i,t in enumerate(self.Patients):
+                   _all_teeths[:,i*2:2*i+2] = t.Teeth
+               _tile_all_teeth = np.array([_all_teeths,]*3200)
+               _dist_sqrt_pts = (_tile_all_teeth - np.transpose(_tile_all_teeth, (1, 0, 2)))**2
+               _dist_sqrt_pts = np.sqrt(_dist_sqrt_pts[:, :,0::2] + _dist_sqrt_pts[:, :,1::2])
+               _var_mat = np.var(_dist_sqrt_pts,axis=2)
+               w = np.sum(_var_mat,axis=1)
+               self.weight_matrix_ = 1/w
+                
+                   
+                   
+                                                                                                                                                                                 
+               
+            
+           
        def _weight_matrix(self,Patients):
            # Inspired by https://github.com/andrewrch/active_shape_models
            self.Patients = Patients 
