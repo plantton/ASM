@@ -26,29 +26,42 @@ class Model:
             else:
                 raise RuntimeError('Patient number not in our set!')
                            
-       def _get_mean_shape(self, Patients):
-             _mean_shape =  np.zeros(shape=(3200,2))            
+       def _get_mean_shape(self, Patients): 
+           # Function return an object Teeth t_0 ***
+             t_mean = Teeth(0)
+             t_mean.Teeth = np.zeros((3200,2))         
              for i in range(len(self.Patients)):
-                    _mean_shape = _mean_shape + Patients[i].Teeth
-             return _mean_shape / len(Patients) if len(Patients) != 0 else _mean_shape      
+                    _mean_shape = t_mean.Teeth + Patients[i].Teeth
+             t_mean.Teeth  = _mean_shape / len(Patients)
+             return t_mean if len(Patients) != 0 else t_mean      
                
        def _procrustes_analysis(self, Patients):
-             initial_shape = self.Patients[0].Teeth
+             initial_shape = self.Patients[0]
              initial_mean_shape = self._get_mean_shape(self.Patients)
+             self._weight_matrix(Patients)
              for i,t in enumerate(self.Patients[1:]):
                  token = t.align_to_shape(initial_shape, self.weight_matrix_)
                  self.Patients[i] = token
-             _init_diff = initial_mean_shape - self._get_mean_shape(self.Patients)
-             
-                
-                                                                                                
-                                                                                                                                               
-       def _weight_matrix_rev(self,Patients):  
+             _init_diff = initial_mean_shape.Teeth - self._get_mean_shape(self.Patients).Teeth
+             # Inspired by https://github.com/CMThF/MIA_ActiveShapeModel/blob/master/generalProcrustes.m
+             # For efficiency
+             diff_token = np.sum(np.sum(abs(_init_diff)))
+             while diff_token > 0.0001:
+                 _mean_shape = self._get_mean_shape(self.Patients)
+                 self._weight_matrix(self.Patients)
+                 for i,t in enumerate(self.Patients[:]):
+                        token = t.align_to_shape(_mean_shape, self.weight_matrix_)
+                        self.Patients[i] = token
+                 _mean_shape_after = self._get_mean_shape(self.Patients)
+                 diff_token = np.sum(np.sum(abs(_mean_shape.Teeth - _mean_shape_after.Teeth)))
+            
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+       def _weight_matrix(self,Patients):  
                # Inspired by https://github.com/andrewrch/active_shape_models
                self.Patients = Patients
                if not Patients:
                     return np.array([0])
-               num_points = 3200  
+               #num_points = 3200  
                num_patients = len(self.Patients)   
                _all_teeths = np.zeros(shape=(3200,2*num_patients))
                for i,t in enumerate(self.Patients):
@@ -66,22 +79,22 @@ class Model:
                
             
            
-       def _weight_matrix(self,Patients):
+       #def _weight_matrix(self,Patients):
            # Inspired by https://github.com/andrewrch/active_shape_models
-           self.Patients = Patients 
+          # self.Patients = Patients 
            #number of points on each unique shape
-           if not Patients:
-                return np.array([0])
-           num_points = 3200
-           weight_matrix = np.zeros(shape=(len(self.Patients),num_points,num_points))
-           for i in range(int(weight_matrix.shape[0])):
-               for k in range(num_points):
-                   for l in range(num_points):
-                       weight_matrix[i,k,l] = math.sqrt((self.Patients[i].Teeth[l,0] - self.Patients[i].Teeth[k,0])**2 + (self.Patients[i].Teeth[l,1] - self.Patients[i].Teeth[k,1])**2)
+          # if not Patients:
+                #return np.array([0])
+           #num_points = 3200
+           #weight_matrix = np.zeros(shape=(len(self.Patients),num_points,num_points))
+           #for i in range(int(weight_matrix.shape[0])):
+               #for k in range(num_points):
+                   #for l in range(num_points):
+                       #weight_matrix[i,k,l] = math.sqrt((self.Patients[i].Teeth[l,0] - self.Patients[i].Teeth[k,0])**2 + (self.Patients[i].Teeth[l,1] - self.Patients[i].Teeth[k,1])**2)
                                                          
-           w = np.zeros(num_points)
-           for k in range(num_points):
-               for l in range(num_points):
-                   w[k] += np.var(weight_matrix[:,k,l])
-           self.weight_matrix_ =  1/w
+           #w = np.zeros(num_points)
+           #for k in range(num_points):
+               #for l in range(num_points):
+                  # w[k] += np.var(weight_matrix[:,k,l])
+           #self.weight_matrix_ =  1/w
            

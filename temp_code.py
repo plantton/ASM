@@ -1,15 +1,16 @@
-    
-    
-    b[:, :,0::2]
-    b[:, :,1::2]
-    b1=np.array([[1,2,3],[4,5,6]])
-    b = np.array([b1,]*3)
-    
-     def get_X():
-         pts = [4,3,2,1]
-         w = range(1,5,1)
-         return sum([w[i]*pts[i] for i in range(len(pts))])
+from Model import Model    
+import time
+m1 = Model()
+m1._get_patients(14)
+
+start_time = time.time()
+m1._weight_matrix(m1.Patients)
+print("--- %s seconds ---" % (time.time() - start_time))
 
 
-for i,t in enumerate(m1.Patients):
-                   _all_teeths[:,i*2:2*i+2] = t.Teeth
+           sum(m1.weight_matrix_ * m1.Patients[0].Teeth[:,0])
+
+           img = plt.imread('C:/Users/tangc/Documents/ComVi/_Data/Radiographs/01.tif')
+           fig = plt.figure()
+           plt.imshow(img)
+           plt.plot(m1.Patients[0].Teeth[:,0],m1.Patients[0].Teeth[:,1],'g.',markersize=1.5)
