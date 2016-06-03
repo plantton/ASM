@@ -36,6 +36,7 @@ class Model:
              return t_mean if len(Patients) != 0 else t_mean      
                
        def _procrustes_analysis(self, Patients):
+           # Return a aligned model with all Teeth within this model converged.
              initial_shape = self.Patients[0]
              initial_mean_shape = self._get_mean_shape(self.Patients)
              self._weight_matrix(Patients)
@@ -46,7 +47,7 @@ class Model:
              # Inspired by https://github.com/CMThF/MIA_ActiveShapeModel/blob/master/generalProcrustes.m
              # For efficiency
              diff_token = np.sum(np.sum(abs(_init_diff)))
-             while diff_token > 0.0001:
+             while diff_token > 0.000001:
                  _mean_shape = self._get_mean_shape(self.Patients)
                  self._weight_matrix(self.Patients)
                  for i,t in enumerate(self.Patients[:]):
@@ -55,7 +56,27 @@ class Model:
                  _mean_shape_after = self._get_mean_shape(self.Patients)
                  diff_token = np.sum(np.sum(abs(_mean_shape.Teeth - _mean_shape_after.Teeth)))
             
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+       def _PCA(self, Patients):
+               if not Patients:
+                    raise RuntimeError('There is no patients in this model!')
+               #num_points = 3200  
+               num_patients = len(self.Patients)   
+               _all_teeths = np.zeros(shape=(num_patients,3200,2))
+               for i,t in enumerate(self.Patients):
+                   _all_teeths[i,:,:] = t.Teeth
+               # Use inalg.eig to do eigenvalue decomposition. 
+               # Inspired from https://github.com/andrewrch/active_shape_models/blob/master/active_shape_models.py
+               cov = np.cov(_all_teeths, rowvar=0)
+               evals, evecs = np.linalg.eig(cov)
+               ratio = 0
+               i = 0
+               while ratio < 0.99:
+                   i += 1
+                   ratio = sum(evals[:i]) / sum(evals)
+               print "The accuracy of model is " + ratio + ' .'
+               return (evals[:i], evecs[:,:i],i) 
+ 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
        def _weight_matrix(self,Patients):  
                # Inspired by https://github.com/andrewrch/active_shape_models
                self.Patients = Patients
