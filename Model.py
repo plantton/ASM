@@ -31,50 +31,47 @@ class Model:
              t_mean = Teeth(0)
              t_mean.Teeth = np.zeros((3200,2))         
              for i in range(len(self.Patients)):
-                    _mean_shape = t_mean.Teeth + Patients[i].Teeth
-             t_mean.Teeth  = _mean_shape / len(Patients)
+                    t_mean.Teeth = t_mean.Teeth + self.Patients[i].Teeth
+             t_mean.Teeth  =t_mean.Teeth / len(Patients)
              return t_mean if len(Patients) != 0 else t_mean      
                
        def _procrustes_analysis(self, Patients):
            # Return a aligned model with all Teeth within this model converged.
-             initial_shape = self.Patients[0]
              initial_mean_shape = self._get_mean_shape(self.Patients)
              self._weight_matrix(Patients)
-             for i,t in enumerate(self.Patients[1:]):
-                 token = t.align_to_shape(initial_shape, self.weight_matrix_)
-                 self.Patients[i] = token
+             self.Patients[1:] = [t.align_to_shape(self.Patients[0], self.weight_matrix_) for t in self.Patients[1:]]
              _init_diff = initial_mean_shape.Teeth - self._get_mean_shape(self.Patients).Teeth
              # Inspired by https://github.com/CMThF/MIA_ActiveShapeModel/blob/master/generalProcrustes.m
              # For efficiency
              diff_token = np.sum(np.sum(abs(_init_diff)))
-             while diff_token > 0.000001:
+             ratio = 0
+             while ratio < 0.98:
                  _mean_shape = self._get_mean_shape(self.Patients)
                  self._weight_matrix(self.Patients)
-                 for i,t in enumerate(self.Patients[:]):
-                        token = t.align_to_shape(_mean_shape, self.weight_matrix_)
-                        self.Patients[i] = token
+                 self.Patients[:] = [t.align_to_shape(_mean_shape, self.weight_matrix_) for t in self.Patients]
                  _mean_shape_after = self._get_mean_shape(self.Patients)
-                 diff_token = np.sum(np.sum(abs(_mean_shape.Teeth - _mean_shape_after.Teeth)))
+                 diff_token_after = np.sum(np.sum(abs(_mean_shape.Teeth - _mean_shape_after.Teeth)))
+                 ratio = diff_token_after / diff_token
+                 diff_token = diff_token_after
             
        def _PCA(self, Patients):
                if not Patients:
                     raise RuntimeError('There is no patients in this model!')
                #num_points = 3200  
                num_patients = len(self.Patients)   
-               _all_teeths = np.zeros(shape=(num_patients,3200,2))
+               _all_teeths = np.zeros(shape=(num_patients,6400))
                for i,t in enumerate(self.Patients):
-                   _all_teeths[i,:,:] = t.Teeth
+                   _all_teeths[i,:] = np.ravel(t.Teeth)
                # Use inalg.eig to do eigenvalue decomposition. 
                # Inspired from https://github.com/andrewrch/active_shape_models/blob/master/active_shape_models.py
                cov = np.cov(_all_teeths, rowvar=0)
                evals, evecs = np.linalg.eig(cov)
-               ratio = 0
-               i = 0
-               while ratio < 0.99:
-                   i += 1
-                   ratio = sum(evals[:i]) / sum(evals)
-               print "The accuracy of model is " + ratio + ' .'
-               return (evals[:i], evecs[:,:i],i) 
+               evals = evals.real
+               evecs = evecs.real
+               ratio = np.divide(evals,sum(evals))
+               _evals = evals[:len(ratio[np.cumsum(ratio)<0.99])]
+               _evecs = evecs[:len(_evals)]
+               return (_evals, _evecs,len(_evals)) 
  
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
        def _weight_matrix(self,Patients):  

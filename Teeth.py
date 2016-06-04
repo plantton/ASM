@@ -141,15 +141,18 @@ class Teeth:
               return np.linalg.solve(a, b)
               
       def _apply_new_model(self, para):
-              t_15 = Teeth(15)
-              t_15.Teeth[:,0] = (para[0]*self.Teeth[:,0] - para[1]*self.Teeth[:,1]) + para[2]
-              t_15.Teeth[:,1] = (para[1]*self.Teeth[:,0] + para[0]*self.Teeth[:,1]) + para[3]
-              return t_15
+              token = np.zeros(shape=(3200,2))
+              token[:,0] = (para[0]*self.Teeth[:,0] - para[1]*self.Teeth[:,1]) + para[2]
+              token[:,1] = (para[1]*self.Teeth[:,0] + para[0]*self.Teeth[:,1]) + para[3]
+              self.Teeth = token
+              return self
               
       def align_to_shape(self, T, weight_matrix_):
           # Inspired by https://github.com/andrewrch/active_shape_models
               para = self._alignment_parameters(T,weight_matrix_)
               return self._apply_new_model(para)
+              
+              
             
               
               
