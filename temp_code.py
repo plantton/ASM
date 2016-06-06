@@ -6,6 +6,10 @@ m1._get_patients(14)
 start_time = time.time()
 m1._procrustes_analysis(m1.Patients)
 print("--- %s seconds ---" % (time.time() - start_time))
+start_time = time.time()
+[evals,evecs,num] = m1._PCA(m1.Patients)
+print("--- %s seconds ---" % (time.time() - start_time))
+
 
 
 m1 = Model()
@@ -15,7 +19,10 @@ m1._procrustes_analysis(m1.Patients)
 print("--- %s seconds ---" % (time.time() - start_time))
 mean_shape = m1._get_mean_shape(m1.Patients)
 [evals,evecs,num] = m1._PCA(m1.Patients)
-
+tot = sum(evals)
+ratio_s = evals / tot
+test = np.dot(evecs,_all_teeths.T)
+plot(test[:,0])
 
 m1._weight_matrix(m1.Patients)
 [a,b]=m1.Patients[1]._alignment_parameters(m1.Patients[2],m1.weight_matrix_)
