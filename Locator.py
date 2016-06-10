@@ -5,6 +5,7 @@ import os
 import numpy as np
 import time
 import fnmatch
+import sys
 # Package imutils installed via extra command
 import imutils
 
@@ -107,31 +108,38 @@ class Locator:
             # loop over the image pyramid
             X = self.createX("C:/Users/tangc/Documents/ComVi/ASM/eigenteeth2")
             [eigenvalues, eigenvectors, mu] = self.pca(X,num_components=10)
+            i = 0
+            ls = []
+            ls.append([0,0,0])
             for resized in self.pyramid(image, scale=1.5):
-       	    # loop over the sliding window for each layer of the pyramid
-           	for (x, y, window) in self.sliding_window(resized, stepSize=4, windowSize=(winW, winH)):
-          		# if the window does not meet our desired window size, ignore it
-          		if window.shape[0] != winH or window.shape[1] != winW:
-         			continue
-            
-          		# THIS IS WHERE YOU WOULD PROCESS YOUR WINDOW, SUCH AS APPLYING A
-          		# MACHINE LEARNING CLASSIFIER TO CLASSIFY THE CONTENTS OF THE
-          		# WINDOW
-          		W=np.zeros(shape=[1,winW*winH])
-          		img = cv2.imread(window)
+                  # Record the number of this image in the pyramid
+                    i += 1
+                  # loop over the sliding window for each layer of the pyramid
+                    token = sys.float_info.max
+                    for (x, y, window) in self.sliding_window(resized, stepSize=4, windowSize=(winW, winH)):
+              		# if the window does not meet our desired window size, ignore it
+                        if window.shape[0] != winH or window.shape[1] != winW:
+             			continue         		
+                        W=np.zeros(shape=[1,winW*winH])
+                        img = cv2.imread(window)
                         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
                         gray = cv2.equalizeHist(gray)
                         W[0,:] = gray.flatten()
-                        fi = W - mu
+                        fi_ = W - mu
                         # Projection page 7 on the paper
                         fi_f = self.project(eigenvectors, W, mu )
-                        epsilon = np.linalg.norm(fi - fi_f)
+                        epsilon_ = np.linalg.norm(fi_ - fi_f)
+                        if epsilon_ < token:
+                            ls[-1] = [i,x,y]
+                        token = epsilon_
           		# since we do not have a classifier, we'll just draw the window
-          		clone = resized.copy()
-          		cv2.rectangle(clone, (x, y), (x + winW, y + winH), (0, 255, 0), 2)
-          		cv2.imshow("Window", clone)
-          		cv2.waitKey(1)
-          		time.sleep(0.025)
+              		clone = resized.copy()
+              		cv2.rectangle(clone, (x, y), (x + winW, y + winH), (0, 255, 0), 2)
+              		cv2.imshow("Window", clone)
+              		cv2.waitKey(1)
+              		time.sleep(0.025)
+                    ls.append([0,0,0])
+            return ls
   		
   		
         if __name__ == '__main__':
