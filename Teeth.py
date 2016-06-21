@@ -1,4 +1,5 @@
 import pandas
+import math
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -152,7 +153,21 @@ class Teeth:
               para = self._alignment_parameters(T,weight_matrix_)
               return self._apply_new_model(para)
               
-              
+      def get_normal_to_point(self, p_num):
+              x = 0; y = 0; mag = 0
+              if p_num <0 and p_num > self.Teeth.shape[0]:
+                        raise RuntimeError('Point is out of range!')
+              if p_num == 0:
+                   x = self.Teeth[1,0] - self.Teeth[0,0]
+                   y = self.Teeth[1,1] - self.Teeth[0,1] 
+              elif p_num == self.Teeth.shape[0] - 1:
+                   x = self.Teeth[-1,0] - self.Teeth[-2,0]
+                   y = self.Teeth[-1,1] - self.Teeth[-2,1]
+              else:
+                   x = self.Teeth[p_num+1,0] - self.Teeth[p_num-1,0]
+                   y = self.Teeth[p_num+1,1] - self.Teeth[p_num-1,1]
+              mag = math.sqrt(x**2 + y**2)
+              return (-y/mag, x/mag)
             
               
               

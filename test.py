@@ -91,13 +91,13 @@ from PIL import Image
            	return edged
         
         # test image reader
-        #file_in = 'C:/Users/tangc/Documents/ComVi/ASM/eigenteeth2/14.jpg'
-        file_in = 'C:/Users/tangc/Documents/ComVi/_Data/Radiographs/03.tif'
+        file_in = 'C:/Users/tangc/Documents/ComVi/ASM/eigenteeth2/03.jpg'
+        #file_in = 'C:/Users/tangc/Documents/ComVi/_Data/Radiographs/03.tif'
         img = cv2.imread(file_in)
-        cv2.imshow("ORIGINAL", img)
+        #cv2.imshow("ORIGINAL", img)
         
         gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-        gray[loc[]]
+        #gray[loc[]]
         clahe = cv2.createCLAHE(clipLimit=8.0, tileGridSize=(25,25))
         cl1=clahe.apply(gray)
         
