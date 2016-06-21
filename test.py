@@ -128,7 +128,8 @@ from PIL import Image
         #blur = cv2.Canny(blur, 15, 150)
         
         # convolute with proper kernels
-        laplacian = cv2.Laplacian(blur, cv2.CV_64F)
+        #laplacian = cv2.Laplacian(blur, cv2.CV_64F)
+        #laplacian = cv2.convertScaleAbs(laplacian)
         sobelx = cv2.Sobel(blur,cv2.CV_64F,1,0,ksize=3)
         sobely = cv2.Sobel(blur,cv2.CV_64F,0,1,ksize=3)
         
@@ -137,7 +138,8 @@ from PIL import Image
         absY = cv2.convertScaleAbs(sobely)
         dst = cv2.addWeighted( absX, 0.5, absY, 0.5,0)
         #cv2.imshow('img', grad)
-        #laplacian = cv2.Laplacian(dst, cv2.CV_16S)
+        laplacian = cv2.Laplacian(dst, cv2.CV_16S)
+        laplacian = cv2.convertScaleAbs(laplacian)
 
         
         plt.subplot(2,2,1),plt.imshow(dst,cmap = 'gray')

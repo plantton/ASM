@@ -169,6 +169,24 @@ class Teeth:
               mag = math.sqrt(x**2 + y**2)
               return (-y/mag, x/mag)
             
+      def _get_Normals(self):
+            Lines = np.zeros(self.Patients[0].Teeth.shape)    
+            Lines[:,0] = np.array(range(len(self.Patients[0].Teeth)))  
+            Lines[:-1,1] = np.array(range(1,len(self.Patients[0].Teeth)))
+            Lines = Lines.astype(int)
+            DT = self.Teeth[Lines[:,0],:] - self.Teeth[Lines[:,1],:] 
+            D1 = np.zeros(self.Teeth.shape)
+            D2 = np.zeros(self.Teeth.shape)
+            D1[Lines[:,0],:] = DT
+            D2[Lines[:,1],:] = DT
+            D=D1+D2
+            L = np.sqrt(D[:,0]**2+D[:,1]**2)
+            N = np.zeros(self.Teeth.shape)
+            N[:,0] = np.divide(D[:,1], L)
+            N[:,1] = np.divide(D[:,0], L)
+            return N
+            
+                                     
               
               
               
