@@ -37,6 +37,15 @@ mean[:,0] = [x - min_x for x in mean[:,0]]
 mean[:,1] = [y - min_y for y in mean[:,1]]
 mean = mean.flatten()
 
+# Show all the teeth landmarks
+for i in range(14):
+     print 'Teeth: ',i
+     #print m1.Patients[i].Teeth
+     print 'max', max(m1.Patients[i].Teeth[:,0]),max(m1.Patients[i].Teeth[:,1])
+     print 'min', min(m1.Patients[i].Teeth[:,0]),min(m1.Patients[i].Teeth[:,1])
+     print max(m1.Patients[i].Teeth[:,0]) - min(m1.Patients[i].Teeth[:,0])
+     print max(m1.Patients[i].Teeth[:,1]) - min(m1.Patients[i].Teeth[:,1])     
+
 
 m1.Patients[1:] = [s.align_to_shape(m1.Patients[0], m1.weight_matrix_) for s in m1.Patients[1:]]
 
