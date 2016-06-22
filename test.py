@@ -91,8 +91,8 @@ from PIL import Image
            	return edged
         
         # test image reader
-        file_in = 'C:/Users/tangc/Documents/ComVi/ASM/eigenteeth2/03.jpg'
-        #file_in = 'C:/Users/tangc/Documents/ComVi/_Data/Radiographs/03.tif'
+        #file_in = 'C:/Users/tangc/Documents/ComVi/ASM/eigenteeth2/03.jpg'
+        file_in = 'C:/Users/tangc/Documents/ComVi/_Data/Radiographs/03.tif'
         img = cv2.imread(file_in)
         #cv2.imshow("ORIGINAL", img)
         
@@ -138,7 +138,7 @@ from PIL import Image
         absY = cv2.convertScaleAbs(sobely)
         dst = cv2.addWeighted( absX, 0.5, absY, 0.5,0)
         #cv2.imshow('img', grad)
-        laplacian = cv2.Laplacian(dst, cv2.CV_16S)
+        laplacian = cv2.Laplacian(dst, cv2.CV_64F)
         laplacian = cv2.convertScaleAbs(laplacian)
 
         

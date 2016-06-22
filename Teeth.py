@@ -2,8 +2,10 @@ import pandas
 import math
 import os
 import numpy as np
+import numpy.matlib
 import matplotlib.pyplot as plt
 from scipy.interpolate import Akima1DInterpolator
+import cv2
 
 # A class represents 8 teeth for a certain patient.
 
@@ -99,6 +101,16 @@ class Teeth:
            plt.title('Patient ' + str(int(self.name.split(':')[1])))
            plt.plot(self.Teeth[:,0],self.Teeth[:,1],'g.',markersize=1.5)
            
+      def __self_image(self):
+            graph_dir = self.ASMdir+'/_Data/Radiographs'
+            os.chdir(graph_dir)
+            if len(str(int(self.name.split(':')[1]))) == 2:
+                img = plt.imread('C:/Users/tangc/Documents/ComVi/_Data/Radiographs/'+str(int(self.name.split(':')[1]))+'.tif')
+            else:
+                img = plt.imread('C:/Users/tangc/Documents/ComVi/_Data/Radiographs/0'+str(int(self.name.split(':')[1]))+'.tif')
+            return img
+           
+           
       # Vectorize the following methods     
       def _num_points(self):
           return int(self.Teeth.shape[0])
@@ -169,31 +181,45 @@ class Teeth:
               mag = math.sqrt(x**2 + y**2)
               return (-y/mag, x/mag)
             
-      def _get_Normals(self):
-            Lines = np.zeros(self.Patients[0].Teeth.shape)    
-            Lines[:,0] = np.array(range(len(self.Patients[0].Teeth)))  
-            Lines[:-1,1] = np.array(range(1,len(self.Patients[0].Teeth)))
-            Lines = Lines.astype(int)
-            DT = self.Teeth[Lines[:,0],:] - self.Teeth[Lines[:,1],:] 
-            D1 = np.zeros(self.Teeth.shape)
-            D2 = np.zeros(self.Teeth.shape)
-            D1[Lines[:,0],:] = DT
-            D2[Lines[:,1],:] = DT
-            D=D1+D2
-            L = np.sqrt(D[:,0]**2+D[:,1]**2)
-            N = np.zeros(self.Teeth.shape)
-            N[:,0] = np.divide(D[:,1], L)
-            N[:,1] = np.divide(D[:,0], L)
-            return N
+      def __get_Normals(self):
+                Lines = np.zeros(self.Teeth.shape)    
+                Lines[:,0] = np.array(range(len(self.Teeth)))  
+                Lines[:-1,1] = np.array(range(1,len(self.Teeth)))
+                Lines = Lines.astype(int)
+                DT = self.Teeth[Lines[:,0],:] - self.Teeth[Lines[:,1],:] 
+                D1 = np.zeros(self.Teeth.shape)
+                D2 = np.zeros(self.Teeth.shape)
+                D1[Lines[:,0],:] = DT
+                D2[Lines[:,1],:] = DT
+                D=D1+D2
+                L = np.sqrt(D[:,0]**2+D[:,1]**2)
+                Normals = np.zeros(self.Teeth.shape)
+                Normals[:,0] = np.divide(D[:,1], L)
+                Normals[:,1] = np.divide(D[:,0], L)
+                return Normals
+                
+      def __linspace_multi(d1,d2,i):
+                token = np.array([d1,]*(i-1)).transpose() + np.multiply(numpy.matlib.repmat(np.arange(i-1),len(d1),1),np.array([(d2-d1),]*(i-1)).transpose())/(math.floor(i)-1)
+                result = np.zeros((token.shape[0],token.shape[1]+1))
+                result[:,:-1] = token
+                result[:,-1] = d2           
+                return result
             
-                                     
-              
-              
-              
-           
-
-
-      
-       
-
-        
+      def __getProfileAndDerivatives2D(self,k):
+                image = self.__self_image()
+                gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+                clahe = cv2.createCLAHE(clipLimit=8.0, tileGridSize=(25,25))
+                image=clahe.apply(gray)
+                k = 8
+                gtc = np.zeros(shape=((k*2+1),len(self.Teeth)))
+                dgtc = np.zeros(shape=((k*2+1),len(self.Teeth)))
+                Normals = self.__get_Normals()
+                #
+                xi=self.__linspace_multi(self.Teeth[:,0]-Normals[:,0]*k, self.Teeth[:,0]+Normals[:,0]*k,k*2+1)
+                yi=self.__linspace_multi(self.Teeth[:,1]-Normals[:,1]*k, self.Teeth[:,1]+Normals[:,1]*k,k*2+1)
+                xi[xi < 1] = 1
+                xi[xi > image.shape[0]] = image.shape[0]
+                yi[yi < 1] = 1
+                yi[yi > image.shape[1]] = image.shape[1]
+                
+                
