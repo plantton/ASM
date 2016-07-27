@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import pandas
 import math
 import os
@@ -6,6 +7,7 @@ import numpy.matlib
 import matplotlib.pyplot as plt
 from scipy.interpolate import Akima1DInterpolator
 import cv2
+from scipy import interpolate
 
 # A class represents 8 teeth for a certain patient.
 
@@ -105,9 +107,9 @@ class Teeth:
             graph_dir = self.ASMdir+'/_Data/Radiographs'
             os.chdir(graph_dir)
             if len(str(int(self.name.split(':')[1]))) == 2:
-                img = plt.imread('C:/Users/tangc/Documents/ComVi/_Data/Radiographs/'+str(int(self.name.split(':')[1]))+'.tif')
+                img = cv2.imread('C:/Users/tangc/Documents/ComVi/_Data/Radiographs/'+str(int(self.name.split(':')[1]))+'.tif')
             else:
-                img = plt.imread('C:/Users/tangc/Documents/ComVi/_Data/Radiographs/0'+str(int(self.name.split(':')[1]))+'.tif')
+                img = cv2.imread('C:/Users/tangc/Documents/ComVi/_Data/Radiographs/0'+str(int(self.name.split(':')[1]))+'.tif')
             return img
            
            
@@ -165,21 +167,23 @@ class Teeth:
               para = self._alignment_parameters(T,weight_matrix_)
               return self._apply_new_model(para)
               
-      def get_normal_to_point(self, p_num):
+      def __get_normal_to_point(teeth_array, p_num):
               x = 0; y = 0; mag = 0
-              if p_num <0 and p_num > self.Teeth.shape[0]:
+              if p_num <0 and p_num >teeth_array.shape[0]:
                         raise RuntimeError('Point is out of range!')
               if p_num == 0:
-                   x = self.Teeth[1,0] - self.Teeth[0,0]
-                   y = self.Teeth[1,1] - self.Teeth[0,1] 
-              elif p_num == self.Teeth.shape[0] - 1:
-                   x = self.Teeth[-1,0] - self.Teeth[-2,0]
-                   y = self.Teeth[-1,1] - self.Teeth[-2,1]
+                   x = teeth_array[1,0] - teeth_array[-1,0]
+                   y = teeth_array[1,1] - teeth_array[-1,1] 
+              elif p_num == teeth_array.shape[0] - 1:
+                   x = teeth_array[0,0] - teeth_array[-2,0]
+                   y = teeth_array[0,1] - teeth_array[-2,1]
               else:
-                   x = self.Teeth[p_num+1,0] - self.Teeth[p_num-1,0]
-                   y = self.Teeth[p_num+1,1] - self.Teeth[p_num-1,1]
+                   x = teeth_array[p_num+1,0] - teeth_array[p_num-1,0]
+                   y = teeth_array[p_num+1,1] - teeth_array[p_num-1,1]
               mag = math.sqrt(x**2 + y**2)
-              return (-y/mag, x/mag)
+              # Return sin(α) and cos(α) in sequence
+              # 'α' is the angle 
+              return (abs(y)/mag, abs(x)/mag, x*y)
             
       def __get_Normals(self):
                 Lines = np.zeros(self.Teeth.shape)    
@@ -198,28 +202,37 @@ class Teeth:
                 Normals[:,1] = np.divide(D[:,0], L)
                 return Normals
                 
-      def __linspace_multi(d1,d2,i):
-                token = np.array([d1,]*(i-1)).transpose() + np.multiply(numpy.matlib.repmat(np.arange(i-1),len(d1),1),np.array([(d2-d1),]*(i-1)).transpose())/(math.floor(i)-1)
-                result = np.zeros((token.shape[0],token.shape[1]+1))
-                result[:,:-1] = token
-                result[:,-1] = d2           
-                return result
-            
-      def __getProfileAndDerivatives2D(self,k):
-                image = self.__self_image()
-                gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
-                clahe = cv2.createCLAHE(clipLimit=8.0, tileGridSize=(25,25))
-                image=clahe.apply(gray)
-                k = 8
-                gtc = np.zeros(shape=((k*2+1),len(self.Teeth)))
-                dgtc = np.zeros(shape=((k*2+1),len(self.Teeth)))
-                Normals = self.__get_Normals()
-                #
-                xi=self.__linspace_multi(self.Teeth[:,0]-Normals[:,0]*k, self.Teeth[:,0]+Normals[:,0]*k,k*2+1)
-                yi=self.__linspace_multi(self.Teeth[:,1]-Normals[:,1]*k, self.Teeth[:,1]+Normals[:,1]*k,k*2+1)
-                xi[xi < 1] = 1
-                xi[xi > image.shape[0]] = image.shape[0]
-                yi[yi < 1] = 1
-                yi[yi > image.shape[1]] = image.shape[1]
-                
-                
+      #def __linspace_multi(d1,d2,i):
+      #          token = np.array([d1,]*(i-1)).transpose() + np.multiply(numpy.matlib.repmat(np.arange(i-1),len(d1),1),np.array([(d2-d1),]*(i-1)).transpose())/(math.floor(i)-1)
+      #          result = np.zeros((token.shape[0],token.shape[1]+1))
+      #          result[:,:-1] = token
+      #          result[:,-1] = d2           
+      #          return result
+      #      
+      #def __getProfileAndDerivatives2D(self,k):
+      #          image = self.__self_image()
+      #          gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+      #          clahe = cv2.createCLAHE(clipLimit=8.0, tileGridSize=(25,25))
+      #          image=clahe.apply(gray)
+      #          k = 8
+      #          gtc = np.zeros(shape=((k*2+1),len(self.Teeth)))
+      #          dgtc = np.zeros(shape=((k*2+1),len(self.Teeth)))
+      #          Normals = self.__get_Normals()
+      #          #
+      #          xi=__linspace_multi(m1.Patients[0].Teeth[:,0]-Normals[:,0]*k, m1.Patients[0].Teeth[:,0]+Normals[:,0]*k,k*2+1)
+      #          yi=__linspace_multi(m1.Patients[0].Teeth[:,1]-Normals[:,1]*k, m1.Patients[0].Teeth[:,1]+Normals[:,1]*k,k*2+1)
+      #          xi[xi < 1] = 1
+      #          xi[xi > image.shape[0]] = image.shape[0]
+      #          yi[yi < 1] = 1
+      #          yi[yi > image.shape[1]] = image.shape[1]
+      #          #
+      #          y = np.arange(0,image.shape[0])
+      #          x = np.arange(0,image.shape[1])
+      #          f = interpolate.RectBivariateSpline(x,y,image.T)
+      #          gt = (f.ev(xi,yi)).T
+      #          gt[np.isnan(gt)] = 0
+      #          dgt = np.zeros((17,3200))
+      #          dgt[0,:] = gt[1,:]-gt[0,:]
+      #          dgt[1:-1,:] = (gt[2:,:]-gt[:-2,:])/2
+      #          dgt[-1,:] = gt[-1,:] - gt[-2,:]
+

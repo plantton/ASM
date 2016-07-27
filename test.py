@@ -153,6 +153,13 @@ from PIL import Image
         
         plt.show()
         
+        
+import numpy
+    #a = numpy.asarray([ [1,2,3], [4,5,6], [7,8,9] ])
+    numpy.savetxt("C:/Users/tangc/Documents/ComVi/ASM/random.txt", m1.Patients[0].Teeth, delimiter=",")
+    #with open("C:/Users/tangc/Documents/ComVi/ASM/random.csv", "w") as fp:
+    #    fp.write(data)
+        
         cv2.imshow('Result', dst)
         grey_image = cv.CreateImage(cv.GetSize(grey), 8, 1)
         df_dx = cv.CreateImage(cv.GetSize(img), cv.IPL_DEPTH_16S, 1)

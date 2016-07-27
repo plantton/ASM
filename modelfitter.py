@@ -16,12 +16,17 @@ from scipy.interpolate import Akima1DInterpolator
 from Locator import Locator
 from Model import Model
 
-# A class to align ASM to a given image
+# A class to fit ASM to a given image
+# Greyscale profile along normal direction of landmarks
+# Use mahalanobis distance to calculate similarities
 
 class ModelFitter:
     
     
     def __init__(self, loc,image):
+        # Loc is the initial location of Active Shape Model
+        # Loc can be given by class Locator (automatic initialisation)
+        # Loc can also be given by manual initialization (mouse input)
         self.loc = loc
         file_in = image
         self.img = cv2.imread(file_in)
