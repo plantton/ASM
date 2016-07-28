@@ -169,7 +169,7 @@ class Teeth:
               
       def __get_normal_to_point(teeth_array, p_num):
               x = 0; y = 0; mag = 0
-              if p_num <0 and p_num >teeth_array.shape[0]:
+              if p_num <0 and p_num >teeth_array.shape[0]-1:
                         raise RuntimeError('Point is out of range!')
               if p_num == 0:
                    x = teeth_array[1,0] - teeth_array[-1,0]
@@ -184,23 +184,50 @@ class Teeth:
               # Return sin(α) and cos(α) in sequence
               # 'α' is the angle 
               return (abs(y)/mag, abs(x)/mag, x*y)
-            
-      def __get_Normals(self):
-                Lines = np.zeros(self.Teeth.shape)    
-                Lines[:,0] = np.array(range(len(self.Teeth)))  
-                Lines[:-1,1] = np.array(range(1,len(self.Teeth)))
-                Lines = Lines.astype(int)
-                DT = self.Teeth[Lines[:,0],:] - self.Teeth[Lines[:,1],:] 
-                D1 = np.zeros(self.Teeth.shape)
-                D2 = np.zeros(self.Teeth.shape)
-                D1[Lines[:,0],:] = DT
-                D2[Lines[:,1],:] = DT
-                D=D1+D2
-                L = np.sqrt(D[:,0]**2+D[:,1]**2)
-                Normals = np.zeros(self.Teeth.shape)
-                Normals[:,0] = np.divide(D[:,1], L)
-                Normals[:,1] = np.divide(D[:,0], L)
-                return Normals
+              
+      def __get_profilepoints(self,teeth_array,p_num,k):
+                # p_num = [0,399]
+                # 'k' is the number of points on each sides of the landmark
+                # Return an array contains the coordinates of the points on the profile
+                _sinA, _cosA, _xy = self.__get_normal_to_point(teeth_array,p_num)
+                # Both _x and _y are positive values
+                #_x = _sinA*k
+                #_y = _cosA*k
+                normal_profile = np.zeros(shape=(2*k+1,2))
+                normal_profile[k,:] = teeth_array[p_num,:]
+                # A littile bit proof of geometry on the paper :)
+                if _xy >= 0:
+                    for i in range(k):
+                        normal_profile[i,0] = teeth_array[p_num,0] - (k-i)*_sinA
+                        normal_profile[i,1] = teeth_array[p_num,1] + (k-i)*_cosA
+                        normal_profile[k+i+1,0] = teeth_array[p_num,0] + (i+1)*_sinA
+                        normal_profile[k+i+1,1] = teeth_array[p_num,1] - (i+1)*_cosA
+                else:
+                    for i in range(k):
+                        normal_profile[i,0] = teeth_array[p_num,0] - (k-i)*_sinA
+                        normal_profile[i,1] = teeth_array[p_num,1] - (k-i)*_cosA
+                        normal_profile[k+i+1,0] = teeth_array[p_num,0] + (i+1)*_sinA
+                        normal_profile[k+i+1,1] = teeth_array[p_num,1] + (i+1)*_cosA
+                return normal_profile
+                
+    def __get_profilepoints(self,):
+                
+      #def __get_Normals(self):
+      #          Lines = np.zeros(self.Teeth.shape)    
+      #          Lines[:,0] = np.array(range(len(self.Teeth)))  
+      #          Lines[:-1,1] = np.array(range(1,len(self.Teeth)))
+      #          Lines = Lines.astype(int)
+      #          DT = self.Teeth[Lines[:,0],:] - self.Teeth[Lines[:,1],:] 
+      #          D1 = np.zeros(self.Teeth.shape)
+      #          D2 = np.zeros(self.Teeth.shape)
+      #          D1[Lines[:,0],:] = DT
+      #          D2[Lines[:,1],:] = DT
+      #          D=D1+D2
+      #          L = np.sqrt(D[:,0]**2+D[:,1]**2)
+      #          Normals = np.zeros(self.Teeth.shape)
+      #          Normals[:,0] = np.divide(D[:,1], L)
+      #          Normals[:,1] = np.divide(D[:,0], L)
+      #          return Normals
                 
       #def __linspace_multi(d1,d2,i):
       #          token = np.array([d1,]*(i-1)).transpose() + np.multiply(numpy.matlib.repmat(np.arange(i-1),len(d1),1),np.array([(d2-d1),]*(i-1)).transpose())/(math.floor(i)-1)
