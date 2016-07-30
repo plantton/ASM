@@ -185,6 +185,31 @@ class Teeth:
               # 'α' is the angle 
               return (abs(y)/mag, abs(x)/mag, x*y)
               
+      # Vectorization of _get_normal method        
+      def __get_normal_to_tooth(teeth_array):
+              # teeth_array.shape = (400,2)
+              T1=np.roll(teeth_array, -1, axis=0)
+              T2=np.roll(teeth_array, 1, axis=0)
+              TN = T1 - T2
+              token = TN**2
+              mag = token[:,0]+token[:,1]
+              mag = sqrt(mag)
+              token_N=np.divide(TN.T,mag).T
+              token_N=np.roll(token_N, 1, axis=1)
+              token_N[:,1]=np.negative(token_N[:,1])
+              return token_N
+              
+      def __get_normal_to_teeth(self):
+              teeth_normals=np.zeros(shape=self.Teeth)
+              for l in range(8):
+                    tV = self.Teeth[l*400:(l+1)*400,:]
+                    token_N = self.__get_normal_to_tooth(tV)
+                    teeth_normals[l*400:(l+1)*400,:] = token_N
+              return teeth_normals
+              
+              
+              
+              
       def __get_profilepoints(self,teeth_array,p_num,k):
                 # p_num = [0,399]
                 # 'k' is the number of points on each sides of the landmark
@@ -208,7 +233,9 @@ class Teeth:
                         normal_profile[i,1] = teeth_array[p_num,1] - (k-i)*_cosA
                         normal_profile[k+i+1,0] = teeth_array[p_num,0] + (i+1)*_sinA
                         normal_profile[k+i+1,1] = teeth_array[p_num,1] + (i+1)*_cosA
-                return normal_profile
+                normal_profile = np.around(normal_profile)
+                normal_profile = normal_profile.astype(int)
+                return  normal_profile # The coordiantes shall be integers
                 
     def __get_profilepoints(self,):
                 
