@@ -206,36 +206,51 @@ class Teeth:
                     token_N = self.__get_normal_to_tooth(tV)
                     teeth_normals[l*400:(l+1)*400,:] = token_N
               return teeth_normals
+      
+      # Inspired from MATLAB AAM codes, the most efficient vectorization method
+      def __linspace_multi(array_1,array_2,num_profile):
+               mat1=array([array_1,]*(num_profile-1)).transpose() 
+               mat2=array([range(num_profile-1),]*array_1.shape[0]) 
+               mat3=array([(array_2-array_1),]*(num_profile-1)).transpose()
+               mat3=mat3/(num_profile-1)
+               # Mat
+               token_mat=mat1+mat2*mat3
+               lin_mat = np.zeros(shape=(token_mat.shape[0],token_mat.shape[1]+1))
+               lin_mat[:,0:-1]=token_mat
+               lin_mat[:,-1]=array_2
+               return lin_mat
+               
+       def
+                        
               
               
               
-              
-      def __get_profilepoints(self,teeth_array,p_num,k):
-                # p_num = [0,399]
-                # 'k' is the number of points on each sides of the landmark
-                # Return an array contains the coordinates of the points on the profile
-                _sinA, _cosA, _xy = self.__get_normal_to_point(teeth_array,p_num)
-                # Both _x and _y are positive values
-                #_x = _sinA*k
-                #_y = _cosA*k
-                normal_profile = np.zeros(shape=(2*k+1,2))
-                normal_profile[k,:] = teeth_array[p_num,:]
-                # A littile bit proof of geometry on the paper :)
-                if _xy >= 0:
-                    for i in range(k):
-                        normal_profile[i,0] = teeth_array[p_num,0] - (k-i)*_sinA
-                        normal_profile[i,1] = teeth_array[p_num,1] + (k-i)*_cosA
-                        normal_profile[k+i+1,0] = teeth_array[p_num,0] + (i+1)*_sinA
-                        normal_profile[k+i+1,1] = teeth_array[p_num,1] - (i+1)*_cosA
-                else:
-                    for i in range(k):
-                        normal_profile[i,0] = teeth_array[p_num,0] - (k-i)*_sinA
-                        normal_profile[i,1] = teeth_array[p_num,1] - (k-i)*_cosA
-                        normal_profile[k+i+1,0] = teeth_array[p_num,0] + (i+1)*_sinA
-                        normal_profile[k+i+1,1] = teeth_array[p_num,1] + (i+1)*_cosA
-                normal_profile = np.around(normal_profile)
-                normal_profile = normal_profile.astype(int)
-                return  normal_profile # The coordiantes shall be integers
+      #def __get_profilepoints(self,teeth_array,p_num,k):
+      #          # p_num = [0,399]
+      #          # 'k' is the number of points on each sides of the landmark
+      #          # Return an array contains the coordinates of the points on the profile
+      #          _sinA, _cosA, _xy = self.__get_normal_to_point(teeth_array,p_num)
+      #          # Both _x and _y are positive values
+      #          #_x = _sinA*k
+      #          #_y = _cosA*k
+      #          normal_profile = np.zeros(shape=(2*k+1,2))
+      #          normal_profile[k,:] = teeth_array[p_num,:]
+      #          # A littile bit proof of geometry on the paper :)
+      #          if _xy >= 0:
+      #              for i in range(k):
+      #                  normal_profile[i,0] = teeth_array[p_num,0] - (k-i)*_sinA
+      #                  normal_profile[i,1] = teeth_array[p_num,1] + (k-i)*_cosA
+      #                  normal_profile[k+i+1,0] = teeth_array[p_num,0] + (i+1)*_sinA
+      #                  normal_profile[k+i+1,1] = teeth_array[p_num,1] - (i+1)*_cosA
+      #          else:
+      #              for i in range(k):
+      #                  normal_profile[i,0] = teeth_array[p_num,0] - (k-i)*_sinA
+      #                  normal_profile[i,1] = teeth_array[p_num,1] - (k-i)*_cosA
+      #                  normal_profile[k+i+1,0] = teeth_array[p_num,0] + (i+1)*_sinA
+      #                  normal_profile[k+i+1,1] = teeth_array[p_num,1] + (i+1)*_cosA
+      #          normal_profile = np.around(normal_profile)
+      #          normal_profile = normal_profile.astype(int)
+      #          return  normal_profile # The coordiantes shall be integers
                 
     def __get_profilepoints(self,):
                 
