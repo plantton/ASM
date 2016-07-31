@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import Akima1DInterpolator
 import cv2
 from scipy import interpolate
+from numpy import *
 
 # A class represents 8 teeth for a certain patient.
 
@@ -193,14 +194,14 @@ class Teeth:
               TN = T1 - T2
               token = TN**2
               mag = token[:,0]+token[:,1]
-              mag = sqrt(mag)
+              mag = np.sqrt(mag)
               token_N=np.divide(TN.T,mag).T
               token_N=np.roll(token_N, 1, axis=1)
               token_N[:,1]=np.negative(token_N[:,1])
               return token_N
               
       def __get_normal_to_teeth(self):
-              teeth_normals=np.zeros(shape=self.Teeth)
+              teeth_normals=np.zeros(shape=(3200,2))
               for l in range(8):
                     tV = self.Teeth[l*400:(l+1)*400,:]
                     token_N = self.__get_normal_to_tooth(tV)
@@ -209,9 +210,9 @@ class Teeth:
       
       # Inspired from MATLAB AAM codes, the most efficient vectorization method
       def __linspace_multi(array_1,array_2,num_profile):
-               mat1=array([array_1,]*(num_profile-1)).transpose() 
-               mat2=array([range(num_profile-1),]*array_1.shape[0]) 
-               mat3=array([(array_2-array_1),]*(num_profile-1)).transpose()
+               mat1=np.array([array_1,]*(num_profile-1)).transpose() 
+               mat2=np.array([range(num_profile-1),]*array_1.shape[0]) 
+               mat3=np.array([(array_2-array_1),]*(num_profile-1)).transpose()
                mat3=mat3/(num_profile-1)
                # Mat
                token_mat=mat1+mat2*mat3
@@ -220,9 +221,25 @@ class Teeth:
                lin_mat[:,-1]=array_2
                return lin_mat
                
-       def
-                        
-              
+      def __get_profile_and_Derivatives(self,k):
+                 image = self.__self_image()
+                 gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+                 # Clahe parameters were adjusted manually.
+                 clahe = cv2.createCLAHE(clipLimit=8.0, tileGridSize=(25,25))
+                 image=clahe.apply(gray)
+                 #gtc = np.zeros(shape=((k*2+1),self.Teeth.shape[0]))
+                 #dgtc = np.zeros(shape=((k*2+1),self.Teeth.shape[0]))
+                 teeth_normals = self.__get_normal_to_teeth()
+                 # xi and yi are the coordiantes of profiles' points
+                 xi = self.__linspace_multi(self.Teeth[:,0]-teeth_normals[:,0]*k,self.Teeth[:,0]+teeth_normals[:,0]*k,k*2+1)
+                 yi = self.__linspace_multi(self.Teeth[:,1]-teeth_normals[:,1]*k,self.Teeth[:,1]+teeth_normals[:,1]*k,k*2+1)
+                 y = np.arange(0,image.shape[0])
+                 x = np.arange(0,image.shape[1])
+                 f = interpolate.RectBivariateSpline(x,y,image.T)
+                 gt = (f.ev(xi,yi)).T
+                 where_are_NaNs = isnan(gt)      
+                 gt[where_are_NaNs] = 0.0
+                 dgt = np.zeros(shape=(gt.shape))
               
               
       #def __get_profilepoints(self,teeth_array,p_num,k):
@@ -252,7 +269,7 @@ class Teeth:
       #          normal_profile = normal_profile.astype(int)
       #          return  normal_profile # The coordiantes shall be integers
                 
-    def __get_profilepoints(self,):
+      #def __get_profilepoints(self,):
                 
       #def __get_Normals(self):
       #          Lines = np.zeros(self.Teeth.shape)    

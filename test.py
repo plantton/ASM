@@ -168,4 +168,16 @@ import numpy
             #cv2.rectangle(vis, (rects[0], rects[1]), (rects[2], rects[3]), (0, 255, 0), 2)
             cv2.imshow('img', vis)
             cv2.waitKey(0)
+            
+            
+              teeth_normals=np.zeros(shape=(3200,2))
+              for l in range(8):
+                    tV = m1.Patients[0].Teeth[l*400:(l+1)*400,:]
+                    token_N = __get_normal_to_tooth(tV)
+                    teeth_normals[l*400:(l+1)*400,:] = token_N
+              return teeth_normals
+            
+k=8         
+xi = __linspace_multi(m1.Patients[0].Teeth[:,0]-teeth_normals[:,0]*k,m1.Patients[0].Teeth[:,0]+teeth_normals[:,0]*k,k*2+1)
+yi = __linspace_multi(m1.Patients[0].Teeth[:,1]-teeth_normals[:,1]*k,m1.Patients[0].Teeth[:,1]+teeth_normals[:,1]*k,k*2+1)
         
