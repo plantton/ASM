@@ -16,9 +16,12 @@ class Teeth:
       ASMdir = 'C:/Users/tangc/Documents/ComVi'
       lddir = ASMdir+'/_Data/Landmarks/original/'
       
-      def __init__(self, i, Teeth = np.zeros(shape=(3200,2))):
+      def __init__(self, i):
              self.name = 'Patient: '+str(i)
-             self.Teeth = Teeth
+             self.Teeth = []
+             self.Normals = []
+             self.profiles = []
+             self.Deritives = []
              
       def _name_(self,i):
             if i in range(1,16,1):
@@ -187,7 +190,7 @@ class Teeth:
               return (abs(y)/mag, abs(x)/mag, x*y)
               
       # Vectorization of _get_normal method        
-      def __get_normal_to_tooth(teeth_array):
+      def __get_normal_to_tooth(self,teeth_array):
               # teeth_array.shape = (400,2)
               T1=np.roll(teeth_array, -1, axis=0)
               T2=np.roll(teeth_array, 1, axis=0)
@@ -200,16 +203,16 @@ class Teeth:
               token_N[:,1]=np.negative(token_N[:,1])
               return token_N
               
-      def __get_normal_to_teeth(self):
+      def get_normal_to_teeth(self):
               teeth_normals=np.zeros(shape=(3200,2))
               for l in range(8):
                     tV = self.Teeth[l*400:(l+1)*400,:]
                     token_N = self.__get_normal_to_tooth(tV)
                     teeth_normals[l*400:(l+1)*400,:] = token_N
-              return teeth_normals
+              self.Normals = teeth_normals
       
       # Inspired from MATLAB AAM codes, the most efficient vectorization method
-      def __linspace_multi(array_1,array_2,num_profile):
+      def __linspace_multi(self,array_1,array_2,num_profile):
                mat1=np.array([array_1,]*(num_profile-1)).transpose() 
                mat2=np.array([range(num_profile-1),]*array_1.shape[0]) 
                mat3=np.array([(array_2-array_1),]*(num_profile-1)).transpose()
@@ -221,7 +224,7 @@ class Teeth:
                lin_mat[:,-1]=array_2
                return lin_mat
                
-      def __get_profile_and_Derivatives(self,k):
+      def get_profile_and_Derivatives(self,k):
                  image = self.__self_image()
                  gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
                  # Clahe parameters were adjusted manually.
@@ -229,7 +232,7 @@ class Teeth:
                  image=clahe.apply(gray)
                  #gtc = np.zeros(shape=((k*2+1),self.Teeth.shape[0]))
                  #dgtc = np.zeros(shape=((k*2+1),self.Teeth.shape[0]))
-                 teeth_normals = self.__get_normal_to_teeth()
+                 teeth_normals = self.Normals
                  # xi and yi are the coordiantes of profiles' points
                  xi = self.__linspace_multi(self.Teeth[:,0]-teeth_normals[:,0]*k,self.Teeth[:,0]+teeth_normals[:,0]*k,k*2+1)
                  yi = self.__linspace_multi(self.Teeth[:,1]-teeth_normals[:,1]*k,self.Teeth[:,1]+teeth_normals[:,1]*k,k*2+1)
@@ -237,9 +240,21 @@ class Teeth:
                  x = np.arange(0,image.shape[1])
                  f = interpolate.RectBivariateSpline(x,y,image.T)
                  gt = (f.ev(xi,yi)).T
+                 gt = gt.clip(min=0)
+                 gt = gt.clip(max=255)
                  where_are_NaNs = isnan(gt)      
                  gt[where_are_NaNs] = 0.0
                  dgt = np.zeros(shape=(gt.shape))
+                 dgt[0,:] = gt[1,:] - gt[0,:]
+                 dgt[1:-1,:] = (gt[2:,] - gt[0:-2,:])/2
+                 dgt[-1,:] = gt[-1,:] - gt[-2,:]
+                 eps =7./3 - 4./3 -1
+                 dgt=dgt/np.array([np.sum(np.absolute(dgt),axis=0)+eps,]*(k*2+1))
+                 gt=gt/np.array([np.sum(np.absolute(gt),axis=0)+eps,]*(k*2+1))
+                 self.profiles = gt
+                 self.Deritives = dgt
+                 
+                
               
               
       #def __get_profilepoints(self,teeth_array,p_num,k):

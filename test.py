@@ -181,3 +181,8 @@ k=8
 xi = __linspace_multi(m1.Patients[0].Teeth[:,0]-teeth_normals[:,0]*k,m1.Patients[0].Teeth[:,0]+teeth_normals[:,0]*k,k*2+1)
 yi = __linspace_multi(m1.Patients[0].Teeth[:,1]-teeth_normals[:,1]*k,m1.Patients[0].Teeth[:,1]+teeth_normals[:,1]*k,k*2+1)
         
+        
+                for l in range(8):
+                    tV = T1.Teeth[l*400:(l+1)*400,:]
+                    token_N = T1.__get_normal_to_tooth(tV)
+                    teeth_normals[l*400:(l+1)*400,:] = token_N

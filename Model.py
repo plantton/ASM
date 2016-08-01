@@ -17,11 +17,13 @@ class Model:
           self.Patients = Patients
           self.weight_matrix_ = self._weight_matrix(Patients)
        
-       def _get_patients(self,i):
+       def _get_patients(self,i,k):
             if i in range(1,15,1):
               for i in range(1,i+1,1):
                 token = Teeth(i)
                 token.create_teeth()
+                token.get_normal_to_teeth()
+                token.get_profile_and_Derivatives(k)
                 self.Patients.append(token)
             else:
                 raise RuntimeError('Patient number not in our set!')
@@ -73,7 +75,29 @@ class Model:
                _evecs = evecs[:len(_evals)]
                return (_evals, _evecs,len(_evals)) 
  
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+       def greyscale_PCA(self,k):
+               # k is the profile length on each side
+               Grey_mean=[]
+               grey_evals=[]
+               grey_evecs=[]
+               for j in range(3200):
+                   g=np.zeros(shape=(2*k+1,len(self.Patients)))
+                   #for i=1:s, g(:,i)=TrainingData(i).GrayProfiles(:,j)
+                   for i in range(len(self.Patients)):
+                       g[:,i] = self.Patients[i].profiles[:,j]
+                   g_mean = np.sum(g, axis=1)/len(self.Patients)
+                   cov = np.cov(g.T, rowvar=0)
+                   evals, evecs = np.linalg.eig(cov)
+                   evals = evals.real
+                   evecs = evecs.real
+                   ratio = np.divide(evals,sum(evals))
+                   _evals = evals[:len(ratio[np.cumsum(ratio)<0.99])]
+                   _evecs = evecs[:len(_evals)]
+                   Grey_mean.append(g_mean)
+                   grey_evals.append(_evals)
+                   grey_evecs.append(_evecs)
+               return Grey_mean,grey_evals,grey_evecs
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
        def _weight_matrix(self,Patients):  
                # Inspired by https://github.com/andrewrch/active_shape_models
                self.Patients = Patients
