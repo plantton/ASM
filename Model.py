@@ -73,7 +73,7 @@ class Model:
                ratio = np.divide(evals,sum(evals))
                _evals = evals[:len(ratio[np.cumsum(ratio)<0.99])]
                _evecs = evecs[:len(_evals)]
-               return (_evals, _evecs,len(_evals)) 
+               return _evals, _evecs,len(_evals) 
  
        def greyscale_PCA(self,k):
                # k is the profile length on each side
