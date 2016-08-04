@@ -40,16 +40,19 @@ class ModelFitter:
         gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
         # Clahe parameters were adjusted manually.
         clahe = cv2.createCLAHE(clipLimit=8.0, tileGridSize=(25,25))
-        self.img = clahe.apply(gray)
+        cl1=clahe.apply(gray)
+        blur = cv2.GaussianBlur(cl1,(3,3),0)
+        blur = cv2.bilateralFilter(blur, 2, 20, 20)
+        sobelx = cv2.Sobel(blur,cv2.CV_64F,1,0,ksize=3)
+        sobely = cv2.Sobel(blur,cv2.CV_64F,0,1,ksize=3)
+        absY = cv2.convertScaleAbs(sobely)
+        absX = cv2.convertScaleAbs(sobelx)
+        dst = cv2.addWeighted( absX, 0.5, absY, 0.5,0)
+        self.img = dst
         
     def init_shape(self):
-        init_shape = self.model._get_mean_shape(self.model.Patients)
+        init_shape = self.model._get_mean_shape(self.model.Patients)        
         return init_shape
-         
-         
-        
-        
-   
                
     #def __produce_gradient_image(self):
     #    gray = cv2.cvtColor(self.img,cv2.COLOR_BGR2GRAY)
@@ -65,7 +68,7 @@ class ModelFitter:
     #    cv2.imshow('Result', dst)
     #    return dst        
         
-    def image_fitting(self,k,ns,loop_num):
+    def image_fitting(self,loc,k,ns,loop_num):
         # loop_num is the loop number for fitting process
         img = cv2.imread(self.file_in)
         clone = img.copy()
@@ -80,7 +83,12 @@ class ModelFitter:
         #_num_shape = shape_datas[0]
         _grey_mean,_grey_evals,_grey_evecs = self.model.greyscale_PCA(k)
         _init_shape = self.init_shape()
-        init_mean_Teeth = _init_shape.Teeth
+        _centroid = np.mean(_init_shape.Teeth, axis=0)
+        _dist_x = _centroid[0] - loc[0]
+        _dist_y = _centroid[1] - loc[1]
+        _init_shape.Teeth[:,0] = _init_shape.Teeth[0] - _dist_x
+        _init_shape.Teeth[:,1] = _init_shape.Teeth[1] - _dist_y
+        init_mean_Teeth = np.copy(_init_shape.Teeth)
         for i in range(loop_num):
             _init_shape.get_normal_to_teeth()
             _Normals = _init_shape.Normals
@@ -100,10 +108,12 @@ class ModelFitter:
             _init_shape.Teeth[:,0] = _init_shape.Teeth[:,0] + movement*_Normals[:,0]
             _init_shape.Teeth[:,1] = _init_shape.Teeth[:,1] + movement*_Normals[:,1]
             clone = img.copy()
-            for s in range(_init_shape.Teeth.shape[0]):
-                _pointx = _init_shape.Teeth[s,0].astype('int')
-                _pointy = _init_shape.Teeth[s,1].astype('int')
-                cv2.circle(clone,(_pointx,_pointy),3,(0,255,0),1,8,3)
+            for s in range(8):
+                #_pointx = _init_shape.Teeth[s,0].astype('int')
+                #_pointy = _init_shape.Teeth[s,1].astype('int')
+                tV = _init_shape.Teeth[s*400:(s+1)*400,:].astype('int32')
+                cv2.polylines(clone,[tV],True,(0,255,0))
+                #cv2.circle(clone,(_pointx,_pointy),3,(0,255,0),1,8,3)
             small = cv2.resize(clone, (0,0), fx=0.3, fy=0.3)
             cv2.imshow( "Fitting Window", small ) 
             x_search = np.ravel(_init_shape.Teeth)
@@ -112,8 +122,8 @@ class ModelFitter:
             maxb = 3*np.sqrt(_evals_shape)
             b=np.max(np.array([np.amin(np.array([b,maxb]),axis=0),-maxb]),axis=0)
             #
-            x_search =  np.ravel(init_mean_Teeth) + np.dot(_evecs_shape.T,b)
-            _init_shape.Teeth = np.reshape(x_search,(_init_shape.Teeth.shape))
+            #x_search =  np.ravel(init_mean_Teeth) + np.dot(_evecs_shape.T,b)
+            #_init_shape.Teeth = np.reshape(x_search,(_init_shape.Teeth.shape))
       	    cv2.waitKey(10)
       	    #time.sleep(2.0)
       	

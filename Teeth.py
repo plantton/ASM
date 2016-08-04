@@ -229,6 +229,13 @@ class Teeth:
                  # Clahe parameters were adjusted manually.
                  clahe = cv2.createCLAHE(clipLimit=8.0, tileGridSize=(25,25))
                  image=clahe.apply(gray)
+                 blur = cv2.GaussianBlur(image,(3,3),0)
+                 blur = cv2.bilateralFilter(blur, 2, 20, 20)
+                 sobelx = cv2.Sobel(blur,cv2.CV_64F,1,0,ksize=3)
+                 sobely = cv2.Sobel(blur,cv2.CV_64F,0,1,ksize=3)
+                 absY = cv2.convertScaleAbs(sobely)
+                 absX = cv2.convertScaleAbs(sobelx)
+                 image = cv2.addWeighted( absX, 0.5, absY, 0.5,0)
                  #gtc = np.zeros(shape=((k*2+1),self.Teeth.shape[0]))
                  #dgtc = np.zeros(shape=((k*2+1),self.Teeth.shape[0]))
                  teeth_normals = self.Normals
@@ -259,6 +266,13 @@ class Teeth:
                  # Clahe parameters were adjusted manually.
                  clahe = cv2.createCLAHE(clipLimit=8.0, tileGridSize=(25,25))
                  image=clahe.apply(gray)
+                 blur = cv2.GaussianBlur(image,(3,3),0)
+                 blur = cv2.bilateralFilter(blur, 2, 20, 20)
+                 sobelx = cv2.Sobel(blur,cv2.CV_64F,1,0,ksize=3)
+                 sobely = cv2.Sobel(blur,cv2.CV_64F,0,1,ksize=3)
+                 absY = cv2.convertScaleAbs(sobely)
+                 absX = cv2.convertScaleAbs(sobelx)
+                 image = cv2.addWeighted( absX, 0.5, absY, 0.5,0)
                  #gtc = np.zeros(shape=((k*2+1),self.Teeth.shape[0]))
                  #dgtc = np.zeros(shape=((k*2+1),self.Teeth.shape[0]))
                  teeth_normals = self.Normals

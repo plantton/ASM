@@ -1,7 +1,10 @@
 from Model import Model    
 import time
 m1 = Model()
-m1._get_patients(14)
+start_time = time.time()
+m1._get_patients(14,8)
+print("--- %s seconds ---" % (time.time() - start_time))
+
 
 start_time = time.time()
 m1._procrustes_analysis(m1.Patients)

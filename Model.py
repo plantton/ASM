@@ -22,9 +22,13 @@ class Model:
               for i in range(1,i+1,1):
                 token = Teeth(i)
                 token.create_teeth()
-                token.get_normal_to_teeth()
-                token.get_profile_and_Derivatives(k)
+                #token.get_normal_to_teeth()
+                #token.get_profile_and_Derivatives(k)
                 self.Patients.append(token)
+              self._procrustes_analysis(self.Patients)
+              for j in range(14):
+                self.Patients[j].get_normal_to_teeth()
+                self.Patients[j].get_profile_and_Derivatives(k)
             else:
                 raise RuntimeError('Patient number not in our set!')
                            
@@ -38,7 +42,7 @@ class Model:
              return t_mean if len(Patients) != 0 else t_mean      
                
        def _procrustes_analysis(self, Patients):
-           # Return a aligned model with all Teeth within this model converged.
+           # Return an aligned model with all Teeth within this model converged.
              initial_mean_shape = self._get_mean_shape(self.Patients)
              self._weight_matrix(Patients)
              self.Patients[1:] = [t.align_to_shape(self.Patients[0], self.weight_matrix_) for t in self.Patients[1:]]
