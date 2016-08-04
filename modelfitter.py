@@ -22,7 +22,7 @@ import pickle
 # Greyscale profile along normal direction of landmarks
 
 class ModelFitter:
-    file_in = 'C:/Users/tangc/Documents/ComVi/_Data/Radiographs/extra/16.tif'
+    file_in = 'C:/Users/tangc/Documents/ComVi/_Data/Radiographs/extra/27.tif'
     
     def __init__(self):
         # Loc is the initial location of Active Shape Model
@@ -50,6 +50,17 @@ class ModelFitter:
         dst = cv2.addWeighted( absX, 0.5, absY, 0.5,0)
         self.img = dst
         
+    #def onclick(self,event):
+    #    if event.xdata != None and event.ydata != None:
+    #        print(event.xdata, event.ydata)
+    #        
+    #def on_click(self):
+    #    im = plt.imread(self.file_in)
+    #    self.onclick()
+    #    cid = fig.canvas.mpl_connect('button_press_event', self.onclick)
+    #    plt.show()
+    # 
+ 
     def init_shape(self):
         init_shape = self.model._get_mean_shape(self.model.Patients)        
         return init_shape
@@ -86,8 +97,8 @@ class ModelFitter:
         _centroid = np.mean(_init_shape.Teeth, axis=0)
         _dist_x = _centroid[0] - loc[0]
         _dist_y = _centroid[1] - loc[1]
-        _init_shape.Teeth[:,0] = _init_shape.Teeth[0] - _dist_x
-        _init_shape.Teeth[:,1] = _init_shape.Teeth[1] - _dist_y
+        _init_shape.Teeth[:,0] = _init_shape.Teeth[:,0] - _dist_x
+        _init_shape.Teeth[:,1] = _init_shape.Teeth[:,1] - _dist_y
         init_mean_Teeth = np.copy(_init_shape.Teeth)
         for i in range(loop_num):
             _init_shape.get_normal_to_teeth()
