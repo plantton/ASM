@@ -9,7 +9,6 @@ from scipy.interpolate import Akima1DInterpolator
 import cv2
 from scipy import interpolate
 from numpy import *
-
 # A class represents 8 teeth for a certain patient.
 
 class Teeth:
@@ -254,7 +253,35 @@ class Teeth:
                  self.profiles = gt
                  self.Deritives = dgt
                  
-                
+      def alter_get_profile_and_Derivatives(self,k,img_loc):
+                 image = cv2.imread(img_loc)
+                 gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+                 # Clahe parameters were adjusted manually.
+                 clahe = cv2.createCLAHE(clipLimit=8.0, tileGridSize=(25,25))
+                 image=clahe.apply(gray)
+                 #gtc = np.zeros(shape=((k*2+1),self.Teeth.shape[0]))
+                 #dgtc = np.zeros(shape=((k*2+1),self.Teeth.shape[0]))
+                 teeth_normals = self.Normals
+                 # xi and yi are the coordiantes of profiles' points
+                 xi = self.__linspace_multi(self.Teeth[:,0]-teeth_normals[:,0]*k,self.Teeth[:,0]+teeth_normals[:,0]*k,k*2+1)
+                 yi = self.__linspace_multi(self.Teeth[:,1]-teeth_normals[:,1]*k,self.Teeth[:,1]+teeth_normals[:,1]*k,k*2+1)
+                 y = np.arange(0,image.shape[0])
+                 x = np.arange(0,image.shape[1])
+                 f = interpolate.RectBivariateSpline(x,y,image.T)
+                 gt = (f.ev(xi,yi)).T
+                 gt = gt.clip(min=0)
+                 gt = gt.clip(max=255)
+                 where_are_NaNs = isnan(gt)      
+                 gt[where_are_NaNs] = 0.0
+                 dgt = np.zeros(shape=(gt.shape))
+                 dgt[0,:] = gt[1,:] - gt[0,:]
+                 dgt[1:-1,:] = (gt[2:,] - gt[0:-2,:])/2
+                 dgt[-1,:] = gt[-1,:] - gt[-2,:]
+                 eps =7./3 - 4./3 -1
+                 dgt=dgt/np.array([np.sum(np.absolute(dgt),axis=0)+eps,]*(k*2+1))
+                 gt=gt/np.array([np.sum(np.absolute(gt),axis=0)+eps,]*(k*2+1))
+                 self.profiles = gt
+                 self.Deritives = dgt               
               
               
       #def __get_profilepoints(self,teeth_array,p_num,k):
