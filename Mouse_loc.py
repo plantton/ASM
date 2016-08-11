@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-im = plt.imread('C:/Users/tangc/Documents/ComVi/_Data/Radiographs/extra/27.tif')
+im = plt.imread('C:/Users/tangc/Documents/ComVi/_Data/Radiographs/extra/20.tif')
 ax = plt.gca()
 fig = plt.gcf()
 implot = ax.imshow(im)

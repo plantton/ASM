@@ -22,7 +22,7 @@ import pickle
 # Greyscale profile along normal direction of landmarks
 
 class ModelFitter:
-    file_in = 'C:/Users/tangc/Documents/ComVi/_Data/Radiographs/extra/27.tif'
+    file_in = 'C:/Users/tangc/Documents/ComVi/_Data/Radiographs/extra/20.tif'
     
     def __init__(self):
         # Loc is the initial location of Active Shape Model
